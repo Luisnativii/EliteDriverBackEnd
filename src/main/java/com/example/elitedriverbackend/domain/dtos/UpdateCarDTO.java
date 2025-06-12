@@ -4,11 +4,13 @@ import jakarta.validation.constraints.NotEmpty;
 import lombok.Data;
 import lombok.Getter;
 
+import java.math.BigDecimal;
+
 @Data
 @Getter
 public class UpdateCarDTO {
     @NotEmpty
-    private String pricePerDay;
+    private BigDecimal pricePerDay;
 
     @NotEmpty
     private Integer kilometers;

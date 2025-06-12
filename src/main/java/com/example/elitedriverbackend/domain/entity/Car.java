@@ -3,6 +3,8 @@ package com.example.elitedriverbackend.domain.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
+
 @Entity
 @Builder
 @Getter
@@ -30,7 +32,7 @@ public class Car {
     private Integer capacity;
 
     @Column(nullable = false)
-    private String  pricePerDay;
+    private BigDecimal pricePerDay;
 
     @Column(nullable = false)
     private Integer kilometers;
