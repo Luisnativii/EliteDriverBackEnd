@@ -1,8 +1,10 @@
 package com.example.elitedriverbackend.services;
 
+import com.example.elitedriverbackend.domain.dtos.CarTypeDTO;
 import com.example.elitedriverbackend.domain.dtos.CreateCarDTO;
 import com.example.elitedriverbackend.domain.dtos.UpdateCarDTO;
 import com.example.elitedriverbackend.domain.entity.Car;
+import com.example.elitedriverbackend.domain.entity.CarType;
 import com.example.elitedriverbackend.repositories.CarRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -50,12 +52,12 @@ public class CarService {
         carRepository.delete(carToDelete);
     }
 
-    public List<Car> getCarByType(String carType) {
+    public List<Car> getCarByType(CarTypeDTO carType) {
         return carRepository.findByCarType(carType);
     }
 
     public List<Car> getCarByCapacity(String capacity) {
-        return carRepository.findByCapacity(capacity);
+        return carRepository.findByCapacity(Integer.valueOf(capacity));
     }
 
 }
