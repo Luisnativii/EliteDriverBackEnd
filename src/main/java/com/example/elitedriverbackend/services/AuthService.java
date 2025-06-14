@@ -1,6 +1,7 @@
 package com.example.elitedriverbackend.services;
 
 
+
 import com.example.elitedriverbackend.domain.dtos.AuthRequest;
 import com.example.elitedriverbackend.domain.dtos.RegisterRequest;
 import com.example.elitedriverbackend.domain.entity.User;
@@ -22,21 +23,32 @@ public class AuthService {
     private final AuthenticationManager authManager;
 
     public String register(RegisterRequest request) {
-        if (userRepository.existsByUsername(request.getUsername())) {
-            throw new RuntimeException("Username already taken");
+        if (userRepository.existsByEmail(request.getEmail())) {
+            throw new RuntimeException("Email already in use");
         }
+
+        if (!request.getPassword().equals(request.getConfirmPassword())) {
+            throw new RuntimeException("Passwords do not match");
+        }
+
         User user = User.builder()
-                .username(request.getUsername())
+                .firstName(request.getFirstName())
+                .lastName(request.getLastName())
+                .birthDate(request.getBirthDate())
+                .dui(request.getDui())
+                .phoneNumber(request.getPhoneNumber())
+                .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .role("USER")
                 .build();
+
         userRepository.save(user);
-        return jwtService.generateToken(user.getUsername());
+        return jwtService.generateToken(user.getEmail());
     }
 
     public String login(AuthRequest request) {
-        var auth = new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword());
+        var auth = new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword());
         authManager.authenticate(auth);
-        return jwtService.generateToken(request.getUsername());
+        return jwtService.generateToken(request.getEmail());
     }
 }
