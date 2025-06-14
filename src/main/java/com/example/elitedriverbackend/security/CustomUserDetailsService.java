@@ -1,6 +1,5 @@
 package com.example.elitedriverbackend.security;
 
-
 import com.example.elitedriverbackend.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.User;

@@ -1,7 +1,5 @@
 package com.example.elitedriverbackend.services;
 
-
-
 import com.example.elitedriverbackend.domain.dtos.AuthRequest;
 import com.example.elitedriverbackend.domain.dtos.RegisterRequest;
 import com.example.elitedriverbackend.domain.entity.User;
@@ -10,6 +8,7 @@ import com.example.elitedriverbackend.security.JwtService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -24,11 +23,7 @@ public class AuthService {
 
     public String register(RegisterRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
-            throw new RuntimeException("Email already in use");
-        }
-
-        if (!request.getPassword().equals(request.getConfirmPassword())) {
-            throw new RuntimeException("Passwords do not match");
+            throw new RuntimeException("Ya existe una cuenta con ese correo.");
         }
 
         User user = User.builder()
@@ -47,8 +42,14 @@ public class AuthService {
     }
 
     public String login(AuthRequest request) {
-        var auth = new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword());
-        authManager.authenticate(auth);
+        var user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new UsernameNotFoundException("El usuario con ese correo no existe."));
+
+        var auth = new UsernamePasswordAuthenticationToken(
+                request.getEmail(), request.getPassword()
+        );
+        authManager.authenticate(auth); // lanza BadCredentialsException si la contraseña es inválida
+
         return jwtService.generateToken(request.getEmail());
     }
 }
