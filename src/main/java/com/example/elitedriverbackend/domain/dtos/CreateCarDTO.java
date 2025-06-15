@@ -1,32 +1,36 @@
 package com.example.elitedriverbackend.domain.dtos;
 
-import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.*;
 import lombok.Data;
-import lombok.Getter;
 
 import java.math.BigDecimal;
 
 @Data
-@Getter
 public class CreateCarDTO {
 
-    @NotEmpty
+    @NotBlank(message = "El nombre no puede estar vacío")
     private String name;
 
-    @NotEmpty
+    @NotBlank(message = "La marca no puede estar vacía")
     private String brand;
 
-    @NotEmpty
+    @NotBlank(message = "El modelo no puede estar vacío")
     private String model;
 
-    @NotEmpty
+    @NotNull(message = "La capacidad es obligatoria")
+    @Min(value = 1, message = "La capacidad debe ser al menos 1")
     private Integer capacity;
 
-    @NotEmpty
+    @NotNull(message = "El precio por día es obligatorio")
+    @DecimalMin(value = "0.0", inclusive = false, message = "El precio debe ser mayor que 0")
     private BigDecimal pricePerDay;
 
-    @NotEmpty
+    @NotNull(message = "Los kilómetros son obligatorios")
+    @Min(value = 0, message = "Los kilómetros no pueden ser negativos")
     private Integer kilometers;
 
+    @Valid
+    @NotNull(message = "El tipo de coche es obligatorio")
     private CarTypeDTO carType;
 }

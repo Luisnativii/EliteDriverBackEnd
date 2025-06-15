@@ -1,12 +1,15 @@
 package com.example.elitedriverbackend.domain.dtos;
 
-import jakarta.validation.constraints.NotEmpty;
+import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.Getter;
+import lombok.NoArgsConstructor;
+import jakarta.validation.constraints.NotBlank;
 
 @Data
-@Getter
+@NoArgsConstructor
+@AllArgsConstructor
 public class CarTypeDTO {
-    @NotEmpty
-    private String carType;
+
+    @NotBlank(message = "El tipo de coche no puede estar vacío")
+    private String type;
 }
