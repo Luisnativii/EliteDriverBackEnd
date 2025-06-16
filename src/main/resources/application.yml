@@ -18,3 +18,4 @@ spring:
 jwt:
   secret: "2dc4d72e-b851-4844-aa5d-f944e452f0d4"
   exptime: 1296000000
+

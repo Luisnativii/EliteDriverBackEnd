@@ -45,6 +45,8 @@ public class DataInitializer {
             });
 
             // 2) Sembrar CarType: PickUps, Sedan, SUV
+
+            // Verificamos si ya existen los tipos de auto
             List<String> tipos = List.of("PickUps", "Sedan", "SUV");
             tipos.forEach(tipoNombre ->
                     carTypeRepository.findByType(tipoNombre).ifPresentOrElse(ct -> {
@@ -61,3 +63,5 @@ public class DataInitializer {
         };
     }
 }
+
+//si lo ve no lo toque solo par conocedores
