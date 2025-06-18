@@ -28,7 +28,10 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
 
                         // tus endpoints de login/registro
-                        .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/api/auth/login", "/api/auth/register").permitAll()
+
+                        // Endpoints que requieren autenticación pero sin rol específico
+                        .requestMatchers("/api/auth/validate").authenticated()
 
                         // solo ADMIN puede crear y actualizar coches
                         .requestMatchers(HttpMethod.POST, "/cars").hasRole("ADMIN")
