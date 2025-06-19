@@ -26,19 +26,17 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-
                         // tus endpoints de login/registro
                         .requestMatchers("/api/auth/login", "/api/auth/register").permitAll()
 
                         // Endpoints que requieren autenticación pero sin rol específico
                         .requestMatchers("/api/auth/validate").authenticated()
 
-                        // solo ADMIN puede crear y actualizar coches
-                        .requestMatchers(HttpMethod.POST, "/cars").hasRole("ADMIN")
-
-                        .requestMatchers(HttpMethod.PUT, "/cars/**").hasRole("ADMIN")
-
-                        // GET /cars y cualquier otro requiere token válido
+                        // Cambiar de "/cars" a "/api/vehicles"
+                        .requestMatchers(HttpMethod.POST, "/api/vehicles").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/vehicles/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/vehicles/**").hasRole("ADMIN")
+                        // GET /api/vehicles y cualquier otro requiere token válido
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);

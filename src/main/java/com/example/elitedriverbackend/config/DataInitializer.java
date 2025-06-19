@@ -1,8 +1,8 @@
 package com.example.elitedriverbackend.config;
 
-import com.example.elitedriverbackend.domain.entity.CarType;
+import com.example.elitedriverbackend.domain.entity.VehicleType;
 import com.example.elitedriverbackend.domain.entity.User;
-import com.example.elitedriverbackend.repositories.CarTypeRepository;
+import com.example.elitedriverbackend.repositories.VehicleTypeRepository;
 import com.example.elitedriverbackend.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
@@ -10,7 +10,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import java.time.LocalDate;
 import java.util.List;
 
 @Configuration
@@ -18,7 +17,7 @@ import java.util.List;
 public class DataInitializer {
 
     private final UserRepository userRepository;
-    private final CarTypeRepository carTypeRepository;  // ← inyectado
+    private final VehicleTypeRepository vehicleTypeRepository; // ← inyectado
     private final PasswordEncoder passwordEncoder;
 
     @Bean
@@ -44,24 +43,21 @@ public class DataInitializer {
                 System.out.println("✅ Admin creado");
             });
 
-            // 2) Sembrar CarType: PickUps, Sedan, SUV
+            // 2) Sembrar VehicleType: PickUps, Sedan, SUV
 
-            // Verificamos si ya existen los tipos de auto
+            // Verificamos si ya existen los tipos de vehículo
             List<String> tipos = List.of("PickUps", "Sedan", "SUV");
             tipos.forEach(tipoNombre ->
-                    carTypeRepository.findByType(tipoNombre).ifPresentOrElse(ct -> {
-                        System.out.println("✅ CarType '" + tipoNombre + "' ya existe");
+                    vehicleTypeRepository.findByType(tipoNombre).ifPresentOrElse(vt -> {
+                        System.out.println("✅ VehicleType '" + tipoNombre + "' ya existe");
                     }, () -> {
-                        CarType nuevo = CarType.builder()
-
+                        VehicleType nuevo = VehicleType.builder()
                                 .type(tipoNombre)
                                 .build();
-                        carTypeRepository.save(nuevo);
-                        System.out.println("✅ CarType '" + tipoNombre + "' creado");
+                        vehicleTypeRepository.save(nuevo);
+                        System.out.println("✅ VehicleType '" + tipoNombre + "' creado");
                     })
             );
         };
     }
 }
-
-//si lo ve no lo toque solo par conocedores

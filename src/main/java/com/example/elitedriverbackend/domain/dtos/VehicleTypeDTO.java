@@ -8,8 +8,8 @@ import jakarta.validation.constraints.NotBlank;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class CarTypeDTO {
+public class VehicleTypeDTO {
 
-    @NotBlank(message = "El tipo de coche no puede estar vacío")
+    @NotBlank(message = "El tipo de vehículo no puede estar vacío") // Cambiado mensaje
     private String type;
 }

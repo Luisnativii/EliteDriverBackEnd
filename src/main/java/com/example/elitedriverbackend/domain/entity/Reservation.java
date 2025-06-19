@@ -36,6 +36,6 @@ public class Reservation {
             name = "car_id",
             nullable = false
     )
-    private Car car;
+    private Vehicle vehicle;
 }
 
