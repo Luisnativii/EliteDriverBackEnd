@@ -46,7 +46,7 @@ public class DataInitializer {
             // 2) Sembrar VehicleType: PickUps, Sedan, SUV
 
             // Verificamos si ya existen los tipos de vehículo
-            List<String> tipos = List.of("PickUps", "Sedan", "SUV");
+            List<String> tipos = List.of("PickUp", "Sedan", "SUV");
             tipos.forEach(tipoNombre ->
                     vehicleTypeRepository.findByType(tipoNombre).ifPresentOrElse(vt -> {
                         System.out.println("✅ VehicleType '" + tipoNombre + "' ya existe");
