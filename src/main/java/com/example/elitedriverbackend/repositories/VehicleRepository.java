@@ -11,4 +11,5 @@ public interface VehicleRepository extends JpaRepository<Vehicle, UUID> {
     List<Vehicle> findByVehicleType(VehicleType vehicleType); // Cambiado de findByCarType
 
     List<Vehicle> findByCapacity(int capacity);
+
 }

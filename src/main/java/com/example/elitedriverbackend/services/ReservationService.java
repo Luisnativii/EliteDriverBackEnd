@@ -4,13 +4,16 @@ import com.example.elitedriverbackend.domain.dtos.CreateReservationDTO;
 import com.example.elitedriverbackend.domain.entity.Reservation;
 import com.example.elitedriverbackend.domain.entity.User;
 import com.example.elitedriverbackend.domain.entity.Vehicle;
+import com.example.elitedriverbackend.domain.entity.VehicleType;
 import com.example.elitedriverbackend.repositories.ReservationRepository;
 import com.example.elitedriverbackend.repositories.UserRepository;
 import com.example.elitedriverbackend.repositories.VehicleRepository;
+import com.example.elitedriverbackend.repositories.VehicleTypeRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -26,6 +29,9 @@ public class ReservationService {
 
     @Autowired
     private VehicleRepository vehicleRepository;
+
+    @Autowired
+    private VehicleTypeRepository vehicleTypeRepository;
 
     public void addReservation(CreateReservationDTO createReservationDTO) {
 
@@ -59,13 +65,13 @@ public class ReservationService {
 
             for (Reservation r : reservations) {
                 try{
-                    log.info("Reserva ID: {}", r.getUUID());
+                    log.info("Reserva ID: {}", r.getId());
                     log.info("Usuario: {}", r.getUser().getFirstName() + " " + r.getUser().getLastName());
                     log.info("Vehículo: {}", r.getVehicle().getName());
                     log.info("Fecha de inicio: {}", r.getStartDate());
                     log.info("Fecha de fin: {}", r.getEndDate());
                 } catch (Exception innerEx) {
-                    log.error("❌ Error procesando reserva con ID: {}", r.getUUID(), innerEx);
+                    log.error("❌ Error procesando reserva con ID: {}", r.getId(), innerEx);
                 }
             }
             return reservations;
@@ -79,5 +85,44 @@ public class ReservationService {
     public Reservation getReservationById(UUID id) {
         return reservationRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Reserva con id " + id + " no encontrada"));
+    }
+    // Metodos que faltan
+    // GetByDateRange, GetByUser, GetByTypeOfVehicle, GetByVehicle
+
+    public List<Reservation> getReservationByRange(Date startDate, Date endDate) {
+        try {
+            return reservationRepository.findByStartDateBetween(startDate, endDate);
+        }catch (Exception e){
+            throw new RuntimeException("Error obteniendo reservas: " + e.getMessage(), e);
+        }
+    }
+    public List<Reservation> getReservationByUser(UUID user) {
+        try {
+            return reservationRepository.findAll().stream()
+                    .filter(reservation -> reservation.getUser().getId().equals(user))
+                    .toList();
+        } catch (Exception e) {
+            throw new RuntimeException("Error obteniendo reservas por usuario: " + e.getMessage(), e);
+        }
+    }
+
+    public List<Reservation> getReservationByVehicle(UUID vehicle) {
+        try {
+            return reservationRepository.findAll().stream()
+                    .filter(reservation -> reservation.getVehicle().getId().equals(vehicle))
+                    .toList();
+        } catch (Exception e) {
+            throw new RuntimeException("Error obteniendo reservas por vehículo: " + e.getMessage(), e);
+        }
+    }
+
+    public List<Reservation> getReservationByVehicleType(String vehicleType) {
+        try {
+            VehicleType type = vehicleTypeRepository.findByType(vehicleType)
+                    .orElseThrow(() -> new RuntimeException("Tipo de vehículo no encontrado"));
+            return reservationRepository.findByVehicle_VehicleType(type);
+        } catch (Exception e) {
+            throw new RuntimeException("Error obteniendo reservas por tipo de vehículo: " + e.getMessage(), e);
+        }
     }
 }

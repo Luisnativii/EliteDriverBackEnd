@@ -12,6 +12,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -64,11 +67,11 @@ public class ReservationController {
 
     private ReservationResponseDTO convertToDTO(Reservation reservation) {
         if (reservation.getVehicle() == null) {
-            throw new RuntimeException("Reservation con id " + reservation.getUUID() + " no tiene vehículo asociado");
+            throw new RuntimeException("Reservation con id " + reservation.getId() + " no tiene vehículo asociado");
         }
 
         return ReservationResponseDTO.builder()
-                .id(reservation.getUUID())
+                .id(String.valueOf(reservation.getId()))
                 .startDate(reservation.getStartDate())
                 .endDate(reservation.getEndDate())
                 .user(ReservationResponseDTO.UserInfo.builder()
@@ -84,4 +87,65 @@ public class ReservationController {
                 .build();
 
     }
+
+    @GetMapping("/date")
+    public ResponseEntity<List<Reservation>> getReservationByRange(@RequestParam("startDate") String startDateStr,
+                                                                    @RequestParam("endDate") String endDateStr) {
+        try {
+            SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
+            Date startDate = dateFormat.parse(startDateStr);
+            Date endDate = dateFormat.parse(endDateStr);
+
+            if(startDate.after(endDate)) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La fecha de inicio no puede ser posterior a la fecha de fin");
+            }
+
+            List<Reservation> reservations = reservationService.getReservationByRange(startDate, endDate);
+            return ResponseEntity.ok(reservations);
+        } catch (ParseException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Fecha no válida: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/user")
+    public ResponseEntity<List<Reservation>> getReservationByUser(@RequestParam("userId") String userId) {
+
+        try{
+
+            UUID uuid = parseUUID(userId);
+            List<Reservation> reservations = reservationService.getReservationByUser(uuid);
+            return ResponseEntity.ok(reservations);
+        }catch (Exception e){
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error en getReservationByUser: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/vehicle")
+    public ResponseEntity<List<Reservation>> getReservationByVehicle(@RequestParam("vehicleId") String vehicleId) {
+        try{
+            UUID uuid = parseUUID(vehicleId);
+            List<Reservation> reservations = reservationService.getReservationByVehicle(uuid);
+            return ResponseEntity.ok(reservations);
+        }catch (Exception e){
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error en getReservationByVehicle: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/vehicleType")
+    public ResponseEntity<List<Reservation>> getReservationByVehicleType(@RequestParam("vehicleType") String vehicleType) {
+        try {
+            List<Reservation> reservations = reservationService.getReservationByVehicleType(vehicleType);
+            return ResponseEntity.ok(reservations);
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error en getReservationByVehicleType: " + e.getMessage());
+        }
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteReservation(@PathVariable String id) {
+        UUID uuid = parseUUID(id);
+        reservationService.deleteReservation(uuid);
+        return ResponseEntity.ok().build();
+    }
+
 }

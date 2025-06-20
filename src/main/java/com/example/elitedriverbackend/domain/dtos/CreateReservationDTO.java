@@ -2,10 +2,12 @@ package com.example.elitedriverbackend.domain.dtos;
 
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.util.Date;
 
@@ -15,10 +17,12 @@ import java.util.Date;
 @NoArgsConstructor
 public class CreateReservationDTO {
 
-    @NotBlank(message = "Start date es requerido")
+    @NotNull(message = "La fecha de inicio es requerida")
+    @DateTimeFormat(pattern = "dd-MM-yyyy")
     private Date startDate;
 
-    @NotBlank(message = "End date es requerido")
+    @NotNull(message = "La fecha de fin es requerida")
+    @DateTimeFormat(pattern = "dd-MM-yyyy")
     private Date endDate;
 
     @NotBlank(message = "El ID del usuario es requerido")
