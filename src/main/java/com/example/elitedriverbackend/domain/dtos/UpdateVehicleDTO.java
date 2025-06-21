@@ -1,5 +1,6 @@
 package com.example.elitedriverbackend.domain.dtos;
 
+import com.example.elitedriverbackend.domain.entity.VehicleStatus;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Min;
@@ -23,4 +24,7 @@ public class UpdateVehicleDTO {
 
     // Nuevo campo para actualizar características del vehículo
     private List<String> features;
+
+    private Integer kmForMaintenance;
+    private VehicleStatus status;
 }

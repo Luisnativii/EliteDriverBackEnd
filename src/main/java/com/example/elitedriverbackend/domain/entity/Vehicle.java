@@ -60,4 +60,12 @@ public class Vehicle {
             nullable = false
     )
     private VehicleType vehicleType;
+
+    @Column(name = "km_for_maintenance")
+    private Integer kmForMaintenance;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status")
+    private VehicleStatus status;
+
 }

@@ -55,4 +55,8 @@ public class CreateVehicleDTO {
         @NotBlank(message = "El tipo de vehículo es requerido")
         private String type;
     }
+
+    @NotNull
+    private Integer kmForMaintenance;
+
 }
