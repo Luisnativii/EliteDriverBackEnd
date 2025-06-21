@@ -27,4 +27,7 @@ public class UpdateVehicleDTO {
 
     private Integer kmForMaintenance;
     private VehicleStatus status;
+
+    private String mainImageUrl;
+    private List<String> imageUrls;
 }

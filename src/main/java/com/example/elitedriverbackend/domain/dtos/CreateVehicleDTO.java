@@ -59,4 +59,7 @@ public class CreateVehicleDTO {
     @NotNull
     private Integer kmForMaintenance;
 
+    private String mainImageUrl;
+    private List<String> imageUrls;
+
 }

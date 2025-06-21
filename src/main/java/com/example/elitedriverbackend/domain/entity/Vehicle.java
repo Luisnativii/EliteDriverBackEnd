@@ -68,4 +68,17 @@ public class Vehicle {
     @Column(name = "status")
     private VehicleStatus status;
 
+    // ← Aquí agregamos la URL de la imagen principal
+    @Column(name = "main_image_url")
+    private String mainImageUrl;
+
+    // ← Y aquí la lista de URLs secundarias
+    @ElementCollection
+    @CollectionTable(
+            name = "vehicle_images",
+            joinColumns = @JoinColumn(name = "vehicle_id")
+    )
+    @Column(name = "image_url")
+    private List<String> imageUrls;
+
 }
