@@ -105,24 +105,30 @@ public class VehicleController {
         }
     }
 
-    private VehicleResponseDTO convertToDTO(Vehicle vehicle) {
-        if (vehicle.getVehicleType() == null) {
-            throw new RuntimeException("VehicleType es null para vehículo ID: " + vehicle.getId());
+    private VehicleResponseDTO convertToDTO(Vehicle v) {
+        if (v.getVehicleType() == null) {
+            throw new RuntimeException("VehicleType es null para vehículo ID: " + v.getId());
         }
 
         return VehicleResponseDTO.builder()
-                .id(vehicle.getId().toString())
-                .name(vehicle.getName())
-                .brand(vehicle.getBrand())
-                .model(vehicle.getModel())
-                .capacity(vehicle.getCapacity())
-                .pricePerDay(vehicle.getPricePerDay())
-                .kilometers(vehicle.getKilometers())
-                .features(vehicle.getFeatures())
+                .id(v.getId().toString())
+                .name(v.getName())
+                .brand(v.getBrand())
+                .model(v.getModel())
+                .capacity(v.getCapacity())
+                .pricePerDay(v.getPricePerDay())
+                .kilometers(v.getKilometers())
+                .features(v.getFeatures())
                 .vehicleType(VehicleResponseDTO.VehicleTypeInfo.builder()
-                        .id(vehicle.getVehicleType().getId().toString())
-                        .type(vehicle.getVehicleType().getType())
-                        .build())
+                        .id(v.getVehicleType().getId().toString())
+                        .type(v.getVehicleType().getType())
+                        .build()
+                )
+                .kmForMaintenance(v.getKmForMaintenance())
+                .status(v.getStatus())
+                .mainImageUrl(v.getMainImageUrl())
+                .imageUrls(v.getImageUrls())
                 .build();
     }
+
 }
