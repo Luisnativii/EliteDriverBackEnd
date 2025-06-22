@@ -15,10 +15,8 @@ public class ReservationResponseDTO {
     private Date startDate;
     private Date endDate;
 
-    // Información básica del usuario, no toda la entidad
     private UserInfo user;
 
-    // Información básica del vehículo, no toda la entidad
     private VehicleInfo vehicle;
 
     @Data

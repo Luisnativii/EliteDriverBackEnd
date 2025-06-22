@@ -22,7 +22,6 @@ public class UpdateVehicleDTO {
     @Min(value = 0, message = "Los kilómetros no pueden ser negativos")
     private Integer kilometers;
 
-    // Nuevo campo para actualizar características del vehículo
     private List<String> features;
 
     private Integer kmForMaintenance;

@@ -12,6 +12,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -43,8 +46,10 @@ public class VehicleService {
 
         // imagen principal
         newVehicle.setMainImageUrl(createVehicleDTO.getMainImageUrl());
-        // lista de imágenes secundarias
-        newVehicle.setImageUrls(createVehicleDTO.getImageUrls());
+        // lista de imágenes secundarias (si viene)
+        if (createVehicleDTO.getImageUrls() != null) {
+            newVehicle.setImageUrls(new ArrayList<>(createVehicleDTO.getImageUrls()));
+        }
 
         String typeName = createVehicleDTO.getVehicleType().getType();
         VehicleType type = vehicleTypeRepository
@@ -88,7 +93,7 @@ public class VehicleService {
             vehicleToUpdate.setMainImageUrl(updateVehicleDTO.getMainImageUrl());
         }
         if (updateVehicleDTO.getImageUrls() != null) {
-            vehicleToUpdate.setImageUrls(updateVehicleDTO.getImageUrls());
+            vehicleToUpdate.setImageUrls(new ArrayList<>(updateVehicleDTO.getImageUrls()));
         }
 
         vehicleRepository.save(vehicleToUpdate);
@@ -108,7 +113,7 @@ public class VehicleService {
             List<Vehicle> vehicles = vehicleRepository.findAll();
 
             log.info("Total vehículos recuperados: {}", vehicles.size());
-            for (Vehicle v : vehicles) {
+            vehicles.forEach(v -> {
                 try {
                     log.info("Vehículo ID: {}", v.getId());
                     log.info("  Nombre: {}", v.getName());
@@ -119,7 +124,7 @@ public class VehicleService {
                 } catch (Exception innerEx) {
                     log.error("❌ Error procesando vehículo con ID: {}", v.getId(), innerEx);
                 }
-            }
+            });
 
             return vehicles;
         } catch (Exception e) {
@@ -144,5 +149,20 @@ public class VehicleService {
     public List<Vehicle> getVehicleByCapacity(String capacity) {
         int cap = Integer.parseInt(capacity);
         return vehicleRepository.findByCapacity(cap);
+    }
+
+
+    public List<Vehicle> getAvailableVehicles(LocalDate startDate, LocalDate endDate) {
+        log.info("Obteniendo vehículos disponibles entre {} y {}", startDate, endDate);
+
+
+        Date start = java.sql.Date.valueOf(startDate);
+        Date end   = java.sql.Date.valueOf(endDate);
+
+        return vehicleRepository.findAvailableBetween(
+                VehicleStatus.maintenanceCompleted,
+                start,
+                end
+        );
     }
 }

@@ -8,11 +8,13 @@ import com.example.elitedriverbackend.services.VehicleService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -35,6 +37,7 @@ public class VehicleController {
     public ResponseEntity<Void> updateVehicle(
             @PathVariable String id,
             @Valid @RequestBody UpdateVehicleDTO dto) {
+
         UUID uuid = parseUUID(id);
         vehicleService.updateVehicle(dto, uuid);
         return ResponseEntity.ok().build();
@@ -44,11 +47,9 @@ public class VehicleController {
     public ResponseEntity<List<VehicleResponseDTO>> getAllVehicles() {
         try {
             List<Vehicle> vehicles = vehicleService.getAllVehicles();
-
             List<VehicleResponseDTO> vehicleDTOs = vehicles.stream()
                     .map(this::convertToDTO)
                     .collect(Collectors.toList());
-
             return ResponseEntity.ok(vehicleDTOs);
 
         } catch (Exception e) {
@@ -72,16 +73,39 @@ public class VehicleController {
         return ResponseEntity.ok().build();
     }
 
+    @GetMapping("/available")
+    public ResponseEntity<List<VehicleResponseDTO>> getAvailableVehicles(
+            @RequestParam("startDate")
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+
+            @RequestParam("endDate")
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate
+    ) {
+        try {
+            log.info("Buscando vehículos disponibles entre {} y {}", startDate, endDate);
+            List<Vehicle> available = vehicleService.getAvailableVehicles(startDate, endDate);
+            List<VehicleResponseDTO> dtos = available.stream()
+                    .map(this::convertToDTO)
+                    .collect(Collectors.toList());
+            return ResponseEntity.ok(dtos);
+
+        } catch (Exception e) {
+            log.error("Error en getAvailableVehicles: ", e);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+                    "Error obteniendo vehículos disponibles: " + e.getMessage());
+        }
+    }
+
     private UUID parseUUID(String id) {
         try {
             return UUID.fromString(id);
         } catch (IllegalArgumentException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "ID no es un UUID válido: " + id);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "ID no es un UUID válido: " + id);
         }
     }
 
     private VehicleResponseDTO convertToDTO(Vehicle vehicle) {
-        // Verificaciones de seguridad
         if (vehicle.getVehicleType() == null) {
             throw new RuntimeException("VehicleType es null para vehículo ID: " + vehicle.getId());
         }
