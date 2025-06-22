@@ -26,23 +26,23 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        // tus endpoints de login/registro
+                        // Endpoints públicos
                         .requestMatchers("/api/auth/login", "/api/auth/register").permitAll()
-
-                        // Endpoints que requieren autenticación pero sin rol específico
+                        .requestMatchers(HttpMethod.GET, "/api/vehicles").permitAll()
+                        // Validación de token
                         .requestMatchers("/api/auth/validate").authenticated()
-
-                        // Cambiar de "/cars" a "/api/vehicles"
-                        .requestMatchers(HttpMethod.POST, "/api/vehicles").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.PUT, "/api/vehicles/**").hasRole("ADMIN")
+                        // Operaciones de administración sobre vehículos
+                        .requestMatchers(HttpMethod.POST,   "/api/vehicles").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT,    "/api/vehicles/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/vehicles/**").hasRole("ADMIN")
-                        // GET /api/vehicles y cualquier otro requiere token válido
+                        // Cualquier otra petición requiere autenticación
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
+
 
     @Bean
     public PasswordEncoder passwordEncoder() {

@@ -10,6 +10,6 @@ import jakarta.validation.constraints.NotBlank;
 @AllArgsConstructor
 public class VehicleTypeDTO {
 
-    @NotBlank(message = "El tipo de vehículo no puede estar vacío") // Cambiado mensaje
+    @NotBlank(message = "El tipo de vehículo no puede estar vacío")
     private String type;
 }

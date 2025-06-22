@@ -1,16 +1,20 @@
 package com.example.elitedriverbackend.services;
 
-import com.example.elitedriverbackend.domain.dtos.VehicleTypeDTO;
 import com.example.elitedriverbackend.domain.dtos.CreateVehicleDTO;
 import com.example.elitedriverbackend.domain.dtos.UpdateVehicleDTO;
+import com.example.elitedriverbackend.domain.dtos.VehicleTypeDTO;
 import com.example.elitedriverbackend.domain.entity.Vehicle;
+import com.example.elitedriverbackend.domain.entity.VehicleStatus;
 import com.example.elitedriverbackend.domain.entity.VehicleType;
 import com.example.elitedriverbackend.repositories.VehicleRepository;
 import com.example.elitedriverbackend.repositories.VehicleTypeRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import lombok.extern.slf4j.Slf4j;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -35,6 +39,18 @@ public class VehicleService {
         newVehicle.setKilometers(createVehicleDTO.getKilometers());
         newVehicle.setFeatures(createVehicleDTO.getFeatures());
 
+        // km para mantenimiento
+        newVehicle.setKmForMaintenance(createVehicleDTO.getKmForMaintenance());
+        // estado inicial
+        newVehicle.setStatus(VehicleStatus.maintenanceCompleted);
+
+        // imagen principal
+        newVehicle.setMainImageUrl(createVehicleDTO.getMainImageUrl());
+        // lista de imágenes secundarias (si viene)
+        if (createVehicleDTO.getImageUrls() != null) {
+            newVehicle.setImageUrls(new ArrayList<>(createVehicleDTO.getImageUrls()));
+        }
+
         String typeName = createVehicleDTO.getVehicleType().getType();
         VehicleType type = vehicleTypeRepository
                 .findByType(typeName)
@@ -51,11 +67,33 @@ public class VehicleService {
         }
 
         Vehicle vehicleToUpdate = opVehicle.get();
-        vehicleToUpdate.setPricePerDay(updateVehicleDTO.getPricePerDay());
-        vehicleToUpdate.setKilometers(updateVehicleDTO.getKilometers());
-
+        if (updateVehicleDTO.getPricePerDay() != null) {
+            vehicleToUpdate.setPricePerDay(updateVehicleDTO.getPricePerDay());
+        }
+        if (updateVehicleDTO.getKilometers() != null) {
+            vehicleToUpdate.setKilometers(updateVehicleDTO.getKilometers());
+        }
         if (updateVehicleDTO.getFeatures() != null) {
             vehicleToUpdate.setFeatures(updateVehicleDTO.getFeatures());
+        }
+        if (updateVehicleDTO.getKmForMaintenance() != null) {
+            vehicleToUpdate.setKmForMaintenance(updateVehicleDTO.getKmForMaintenance());
+        }
+
+        // regla de negocio: si supera kmForMaintenance ⇒ maintenanceRequired
+        if (vehicleToUpdate.getKilometers() >= vehicleToUpdate.getKmForMaintenance()) {
+            vehicleToUpdate.setStatus(VehicleStatus.maintenanceRequired);
+        }
+        // de lo contrario, permite que el admin fije otro status
+        else if (updateVehicleDTO.getStatus() != null) {
+            vehicleToUpdate.setStatus(updateVehicleDTO.getStatus());
+        }
+
+        if (updateVehicleDTO.getMainImageUrl() != null) {
+            vehicleToUpdate.setMainImageUrl(updateVehicleDTO.getMainImageUrl());
+        }
+        if (updateVehicleDTO.getImageUrls() != null) {
+            vehicleToUpdate.setImageUrls(new ArrayList<>(updateVehicleDTO.getImageUrls()));
         }
 
         vehicleRepository.save(vehicleToUpdate);
@@ -75,8 +113,7 @@ public class VehicleService {
             List<Vehicle> vehicles = vehicleRepository.findAll();
 
             log.info("Total vehículos recuperados: {}", vehicles.size());
-
-            for (Vehicle v : vehicles) {
+            vehicles.forEach(v -> {
                 try {
                     log.info("Vehículo ID: {}", v.getId());
                     log.info("  Nombre: {}", v.getName());
@@ -87,7 +124,7 @@ public class VehicleService {
                 } catch (Exception innerEx) {
                     log.error("❌ Error procesando vehículo con ID: {}", v.getId(), innerEx);
                 }
-            }
+            });
 
             return vehicles;
         } catch (Exception e) {
@@ -95,7 +132,6 @@ public class VehicleService {
             throw new RuntimeException("Error al obtener vehículos: " + e.getMessage(), e);
         }
     }
-
 
     public Vehicle getVehicleById(UUID id) {
         return vehicleRepository.findById(id)
@@ -113,5 +149,20 @@ public class VehicleService {
     public List<Vehicle> getVehicleByCapacity(String capacity) {
         int cap = Integer.parseInt(capacity);
         return vehicleRepository.findByCapacity(cap);
+    }
+
+
+    public List<Vehicle> getAvailableVehicles(LocalDate startDate, LocalDate endDate) {
+        log.info("Obteniendo vehículos disponibles entre {} y {}", startDate, endDate);
+
+
+        Date start = java.sql.Date.valueOf(startDate);
+        Date end   = java.sql.Date.valueOf(endDate);
+
+        return vehicleRepository.findAvailableBetween(
+                VehicleStatus.maintenanceCompleted,
+                start,
+                end
+        );
     }
 }

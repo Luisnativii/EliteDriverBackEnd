@@ -1,5 +1,6 @@
 package com.example.elitedriverbackend.domain.dtos;
 
+import com.example.elitedriverbackend.domain.entity.VehicleStatus;
 import lombok.*;
 
 import java.math.BigDecimal;
@@ -30,4 +31,11 @@ public class VehicleResponseDTO {
         private String id;
         private String type;
     }
+
+    private Integer kmForMaintenance;
+    private VehicleStatus status;
+
+    private String mainImageUrl;
+    private List<String> imageUrls;
+
 }

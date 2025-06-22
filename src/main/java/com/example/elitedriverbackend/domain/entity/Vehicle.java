@@ -7,6 +7,7 @@ import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -28,7 +29,7 @@ public class Vehicle {
             strategy = "org.hibernate.id.UUIDGenerator"
     )
     @Column(name = "id", updatable = false, nullable = false)
-    @JdbcTypeCode(SqlTypes.UUID)  // Changed from VARCHAR to UUID
+    @JdbcTypeCode(SqlTypes.UUID)
     private UUID id;
 
     @Column(nullable = false)
@@ -50,9 +51,12 @@ public class Vehicle {
     private Integer kilometers;
 
     @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(name = "vehicle_features", joinColumns = @JoinColumn(name = "vehicle_id"))
-    @Column(name = "feature")
-    private List<String> features;
+    @CollectionTable(
+            name = "vehicle_features",
+            joinColumns = @JoinColumn(name = "vehicle_id")
+    )
+    @Column(name = "feature", nullable = false)
+    private List<String> features = new ArrayList<>();
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(
@@ -60,4 +64,22 @@ public class Vehicle {
             nullable = false
     )
     private VehicleType vehicleType;
+
+    @Column(name = "km_for_maintenance")
+    private Integer kmForMaintenance;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status")
+    private VehicleStatus status;
+
+    @Column(name = "main_image_url")
+    private String mainImageUrl;
+
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(
+            name = "vehicle_images",
+            joinColumns = @JoinColumn(name = "vehicle_id")
+    )
+    @Column(name = "image_url", nullable = false)
+    private List<String> imageUrls = new ArrayList<>();
 }
