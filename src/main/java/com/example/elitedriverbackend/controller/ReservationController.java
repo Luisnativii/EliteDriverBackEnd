@@ -28,10 +28,12 @@ public class ReservationController {
     private final ReservationService reservationService;
 
     @PostMapping
-    public ResponseEntity<Reservation> addReservation(@Valid @RequestBody CreateReservationDTO dto) {
-        reservationService.addReservation(dto);
-        return new ResponseEntity<>(HttpStatus.CREATED);
+    public ResponseEntity<ReservationResponseDTO> addReservation(@Valid @RequestBody CreateReservationDTO dto) {
+        Reservation reservation = reservationService.addReservation(dto);
+        ReservationResponseDTO responseDTO = convertToDTO(reservation);
+        return ResponseEntity.status(HttpStatus.CREATED).body(responseDTO);
     }
+
 
     @GetMapping("{id}")
     public ResponseEntity<Reservation> getReservation(@PathVariable String id) {
@@ -48,6 +50,9 @@ public class ReservationController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Id no es un UUID válido: " + id);
         }
     }
+
+
+
 
     @GetMapping
     public ResponseEntity<List<ReservationResponseDTO>> getAllReservations() {
@@ -74,6 +79,7 @@ public class ReservationController {
                 .id(String.valueOf(reservation.getId()))
                 .startDate(reservation.getStartDate())
                 .endDate(reservation.getEndDate())
+                .status("confirmado")
                 .user(ReservationResponseDTO.UserInfo.builder()
                         .id(String.valueOf(reservation.getUser().getId()))
                         .firstName(reservation.getUser().getFirstName())
@@ -83,13 +89,15 @@ public class ReservationController {
                         .id(String.valueOf(reservation.getVehicle().getId()))
                         .name(reservation.getVehicle().getName())
                         .brand(reservation.getVehicle().getBrand())
+                        .mainImageUrl(reservation.getVehicle().getMainImageUrl())
+                        .pricePerDay(reservation.getVehicle().getPricePerDay().doubleValue())
                         .build())
                 .build();
 
     }
 
     @GetMapping("/date")
-    public ResponseEntity<List<Reservation>> getReservationByRange(@RequestParam("startDate") String startDateStr,
+    public ResponseEntity<List<ReservationResponseDTO>> getReservationByRange(@RequestParam("startDate") String startDateStr,
                                                                     @RequestParam("endDate") String endDateStr) {
         try {
             SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
@@ -99,26 +107,35 @@ public class ReservationController {
             if(startDate.after(endDate)) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La fecha de inicio no puede ser posterior a la fecha de fin");
             }
-
             List<Reservation> reservations = reservationService.getReservationByRange(startDate, endDate);
-            return ResponseEntity.ok(reservations);
+            List<ReservationResponseDTO> dtos = reservations.stream()
+                    .map(this::convertToDTO)
+                    .collect(Collectors.toList());
+
+            return ResponseEntity.ok(dtos);
         } catch (ParseException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Fecha no válida: " + e.getMessage());
         }
     }
 
     @GetMapping("/user")
-    public ResponseEntity<List<Reservation>> getReservationByUser(@RequestParam("userId") String userId) {
+    public ResponseEntity<List<ReservationResponseDTO>> getReservationByUser(@RequestParam("userId") String userId) {
+        try {
+            UUID uuid = UUID.fromString(userId); // conversión segura con try-catch
 
-        try{
-
-            UUID uuid = parseUUID(userId);
             List<Reservation> reservations = reservationService.getReservationByUser(uuid);
-            return ResponseEntity.ok(reservations);
-        }catch (Exception e){
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error en getReservationByUser: " + e.getMessage());
+
+            List<ReservationResponseDTO> reservationDTOs = reservations.stream()
+                    .map(this::convertToDTO)
+                    .collect(Collectors.toList());
+
+            return ResponseEntity.ok(reservationDTOs);
+        } catch (IllegalArgumentException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "UUID inválido: " + userId);
         }
     }
+
+
 
     @GetMapping("/vehicle")
     public ResponseEntity<List<Reservation>> getReservationByVehicle(@RequestParam("vehicleId") String vehicleId) {

@@ -19,7 +19,7 @@ public class Reservation {
     @Id
     @GeneratedValue(generator = "UUID")
     @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
-    @Column(updatable = false, nullable = false)
+    @Column(name ="id",updatable = false, nullable = false)
     private UUID id;
 
     @Column(nullable = false)

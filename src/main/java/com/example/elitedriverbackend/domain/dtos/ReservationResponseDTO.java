@@ -14,6 +14,7 @@ public class ReservationResponseDTO {
     private String id;
     private Date startDate;
     private Date endDate;
+    private String status;
 
     private UserInfo user;
 
@@ -37,5 +38,7 @@ public class ReservationResponseDTO {
         private String id;
         private String name;
         private String brand;
+        private String mainImageUrl;
+        private double pricePerDay;
     }
 }

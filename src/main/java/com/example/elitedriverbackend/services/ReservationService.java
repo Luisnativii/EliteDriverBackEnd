@@ -11,7 +11,9 @@ import com.example.elitedriverbackend.repositories.VehicleRepository;
 import com.example.elitedriverbackend.repositories.VehicleTypeRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Date;
 import java.util.List;
@@ -33,20 +35,33 @@ public class ReservationService {
     @Autowired
     private VehicleTypeRepository vehicleTypeRepository;
 
-    public void addReservation(CreateReservationDTO createReservationDTO) {
+    public Reservation addReservation(CreateReservationDTO createReservationDTO) {
 
         User user = userRepository.findById(UUID.fromString(createReservationDTO.getUserId()))
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
         Vehicle vehicle = vehicleRepository.findById(UUID.fromString(createReservationDTO.getVehicleId()))
                 .orElseThrow(() -> new RuntimeException("Vehiculo no encontrado"));
+        Date start = createReservationDTO.getStartDate();
+        Date end = createReservationDTO.getEndDate();
+
+        // Validar si ya está reservado en ese rango
+        List<Reservation> overlappingReservations = reservationRepository
+                .findByVehicleIdAndDateOverlap(vehicle.getId(), start, end);
+
+        if (!overlappingReservations.isEmpty()) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "❌ Este vehículo ya está reservado en el rango de fechas seleccionado"
+            );
+              }
 
         Reservation newReservation = new Reservation();
-        newReservation.setStartDate(createReservationDTO.getStartDate());
-        newReservation.setEndDate(createReservationDTO.getEndDate());
+        newReservation.setStartDate(start);
+        newReservation.setEndDate(end);
         newReservation.setUser(user);
         newReservation.setVehicle(vehicle);
-        reservationRepository.save(newReservation);
+        return reservationRepository.save(newReservation);
     }
 
     public void deleteReservation(UUID id) {
