@@ -67,24 +67,52 @@ public class VehicleService {
         }
 
         Vehicle vehicleToUpdate = opVehicle.get();
+
+        // Almacenar el km anterior para calcular la diferencia
+        Integer previousKm = vehicleToUpdate.getKilometers();
+
         if (updateVehicleDTO.getPricePerDay() != null) {
             vehicleToUpdate.setPricePerDay(updateVehicleDTO.getPricePerDay());
         }
+
         if (updateVehicleDTO.getKilometers() != null) {
             vehicleToUpdate.setKilometers(updateVehicleDTO.getKilometers());
         }
+
         if (updateVehicleDTO.getFeatures() != null) {
             vehicleToUpdate.setFeatures(updateVehicleDTO.getFeatures());
         }
+
         if (updateVehicleDTO.getKmForMaintenance() != null) {
             vehicleToUpdate.setKmForMaintenance(updateVehicleDTO.getKmForMaintenance());
         }
 
-        // regla de negocio: si supera kmForMaintenance ⇒ maintenanceRequired
-        if (vehicleToUpdate.getKilometers() >= vehicleToUpdate.getKmForMaintenance()) {
-            vehicleToUpdate.setStatus(VehicleStatus.maintenanceRequired);
+        // NUEVA LÓGICA: Verificar mantenimiento basado en intervalos
+        if (updateVehicleDTO.getKilometers() != null && vehicleToUpdate.getKmForMaintenance() != null) {
+            Integer currentKm = updateVehicleDTO.getKilometers();
+            Integer maintenanceInterval = vehicleToUpdate.getKmForMaintenance();
+
+            // Calcular cuántos intervalos de mantenimiento ha completado el vehículo
+            Integer currentMaintenanceCycles = currentKm / maintenanceInterval;
+            Integer previousMaintenanceCycles = previousKm / maintenanceInterval;
+
+            log.info("🔧 Verificando mantenimiento para vehículo {}: {} km -> {} km",
+                    vehicleToUpdate.getName(), previousKm, currentKm);
+            log.info("Intervalos completados: anterior={}, actual={}, intervalo={}km",
+                    previousMaintenanceCycles, currentMaintenanceCycles, maintenanceInterval);
+
+            // Si ha completado más ciclos de mantenimiento, requiere mantenimiento
+            if (currentMaintenanceCycles > previousMaintenanceCycles) {
+                vehicleToUpdate.setStatus(VehicleStatus.maintenanceRequired);
+                log.info("⚠️ Vehículo {} requiere mantenimiento - Completó {} intervalos de {}km",
+                        vehicleToUpdate.getName(), currentMaintenanceCycles, maintenanceInterval);
+            }
+            // Solo permitir cambio manual de status si no requiere mantenimiento automático
+            else if (updateVehicleDTO.getStatus() != null) {
+                vehicleToUpdate.setStatus(updateVehicleDTO.getStatus());
+            }
         }
-        // de lo contrario, permite que el admin fije otro status
+        // Si no se actualizan los km, permitir cambio manual de status
         else if (updateVehicleDTO.getStatus() != null) {
             vehicleToUpdate.setStatus(updateVehicleDTO.getStatus());
         }
@@ -92,6 +120,7 @@ public class VehicleService {
         if (updateVehicleDTO.getMainImageUrl() != null) {
             vehicleToUpdate.setMainImageUrl(updateVehicleDTO.getMainImageUrl());
         }
+
         if (updateVehicleDTO.getImageUrls() != null) {
             vehicleToUpdate.setImageUrls(new ArrayList<>(updateVehicleDTO.getImageUrls()));
         }

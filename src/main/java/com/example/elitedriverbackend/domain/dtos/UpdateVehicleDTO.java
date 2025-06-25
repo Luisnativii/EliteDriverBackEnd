@@ -14,11 +14,11 @@ import java.util.List;
 @Getter
 public class UpdateVehicleDTO {
 
-    @NotNull(message = "El precio por día no puede ser nulo")
+
     @Positive(message = "El precio por día debe ser mayor a 0")
     private BigDecimal pricePerDay;
 
-    @NotNull(message = "Los kilómetros no pueden ser nulos")
+
     @Min(value = 0, message = "Los kilómetros no pueden ser negativos")
     private Integer kilometers;
 

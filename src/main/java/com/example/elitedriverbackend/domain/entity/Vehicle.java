@@ -82,4 +82,50 @@ public class Vehicle {
     )
     @Column(name = "image_url", nullable = false)
     private List<String> imageUrls = new ArrayList<>();
+
+    // =============================================
+    // MÉTODOS DE MANTENIMIENTO (DENTRO DE LA CLASE)
+    // =============================================
+
+    /**
+     * Calcula el próximo kilómetraje de mantenimiento
+     */
+    public Integer getNextMaintenanceKm() {
+        if (kilometers == null || kmForMaintenance == null) {
+            return null;
+        }
+        int cycles = (int) Math.ceil((double) kilometers / kmForMaintenance);
+        return cycles * kmForMaintenance;
+    }
+
+    /**
+     * Calcula cuántos kilómetros faltan para el próximo mantenimiento
+     */
+    public Integer getKmUntilMaintenance() {
+        Integer nextMaintenance = getNextMaintenanceKm();
+        if (nextMaintenance == null || kilometers == null) {
+            return null;
+        }
+        return Math.max(0, nextMaintenance - kilometers);
+    }
+
+    /**
+     * Verifica si el vehículo necesita mantenimiento basado en intervalos
+     */
+    public boolean needsMaintenance() {
+        if (kilometers == null || kmForMaintenance == null) {
+            return false;
+        }
+        return kilometers % kmForMaintenance == 0 && kilometers > 0;
+    }
+
+    /**
+     * Obtiene el número de ciclos de mantenimiento completados
+     */
+    public Integer getCompletedMaintenanceCycles() {
+        if (kilometers == null || kmForMaintenance == null) {
+            return 0;
+        }
+        return kilometers / kmForMaintenance;
+    }
 }
