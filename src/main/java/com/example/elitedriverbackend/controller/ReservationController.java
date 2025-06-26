@@ -75,26 +75,38 @@ public class ReservationController {
             throw new RuntimeException("Reservation con id " + reservation.getId() + " no tiene vehículo asociado");
         }
 
+        // ✅ Calcular totalPrice
+        long diffMillis = reservation.getEndDate().getTime() - reservation.getStartDate().getTime();
+        int days = (int) Math.ceil(diffMillis / (1000.0 * 60 * 60 * 24));
+        double pricePerDay = reservation.getVehicle().getPricePerDay().doubleValue();
+        double totalPrice = days * pricePerDay;
+
         return ReservationResponseDTO.builder()
                 .id(String.valueOf(reservation.getId()))
                 .startDate(reservation.getStartDate())
                 .endDate(reservation.getEndDate())
                 .status("confirmado")
+                .totalPrice(totalPrice) // ✅ Usar el cálculo
                 .user(ReservationResponseDTO.UserInfo.builder()
                         .id(String.valueOf(reservation.getUser().getId()))
                         .firstName(reservation.getUser().getFirstName())
                         .lastName(reservation.getUser().getLastName())
+                        .email(reservation.getUser().getEmail())
+                        .dui(reservation.getUser().getDui())
                         .build())
                 .vehicle(ReservationResponseDTO.VehicleInfo.builder()
                         .id(String.valueOf(reservation.getVehicle().getId()))
                         .name(reservation.getVehicle().getName())
                         .brand(reservation.getVehicle().getBrand())
+                        .model(reservation.getVehicle().getModel())
+                        .capacity(reservation.getVehicle().getCapacity())
                         .mainImageUrl(reservation.getVehicle().getMainImageUrl())
-                        .pricePerDay(reservation.getVehicle().getPricePerDay().doubleValue())
+                        .vehicleType(reservation.getVehicle().getVehicleType().getType())
+                        .pricePerDay(pricePerDay)
                         .build())
                 .build();
-
     }
+
 
     @GetMapping("/date")
     public ResponseEntity<List<ReservationResponseDTO>> getReservationByRange(@RequestParam("startDate") String startDateStr,

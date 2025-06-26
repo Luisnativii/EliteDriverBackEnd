@@ -83,6 +83,9 @@ public class ReservationService {
                     log.info("Reserva ID: {}", r.getId());
                     log.info("Usuario: {}", r.getUser().getFirstName() + " " + r.getUser().getLastName());
                     log.info("Vehículo: {}", r.getVehicle().getName());
+                    log.info("Tipo de vehículo: {}", r.getVehicle().getVehicleType() != null ? r.getVehicle().getVehicleType().getType() : "N/A");
+                    log.info("DUI del usuario: {}", r.getUser().getDui());
+                    log.info("Correo del usuario: {}", r.getUser().getEmail());
                     log.info("Fecha de inicio: {}", r.getStartDate());
                     log.info("Fecha de fin: {}", r.getEndDate());
                 } catch (Exception innerEx) {

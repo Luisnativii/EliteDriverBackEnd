@@ -15,6 +15,7 @@ public class ReservationResponseDTO {
     private Date startDate;
     private Date endDate;
     private String status;
+    private Double totalPrice;
 
     private UserInfo user;
 
@@ -28,6 +29,8 @@ public class ReservationResponseDTO {
         private String id;
         private String firstName;
         private String lastName;
+        private String email;
+        private String dui;
     }
 
     @Data
@@ -38,7 +41,11 @@ public class ReservationResponseDTO {
         private String id;
         private String name;
         private String brand;
+        private String model;
+        private Integer capacity;
         private String mainImageUrl;
         private double pricePerDay;
+        private String vehicleType;
+
     }
 }
