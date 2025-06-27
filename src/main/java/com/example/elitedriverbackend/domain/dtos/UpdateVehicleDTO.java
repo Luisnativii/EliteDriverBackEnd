@@ -29,4 +29,6 @@ public class UpdateVehicleDTO {
 
     private String mainImageUrl;
     private List<String> imageUrls;
+
+    private String insurancePhone;
 }

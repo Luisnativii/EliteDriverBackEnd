@@ -2,7 +2,6 @@ package com.example.elitedriverbackend.domain.dtos;
 
 import com.example.elitedriverbackend.domain.entity.VehicleStatus;
 import lombok.*;
-
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -19,9 +18,14 @@ public class VehicleResponseDTO {
     private BigDecimal pricePerDay;
     private Integer kilometers;
     private List<String> features;
-
-    // Solo incluimos la información básica del tipo, no toda la entidad
     private VehicleTypeInfo vehicleType;
+    private Integer kmForMaintenance;
+    private VehicleStatus status;
+    private String mainImageUrl;
+    private List<String> imageUrls;
+    private String insurancePhone;
+
+    private List<MaintenanceRecordDTO> maintenanceRecords;
 
     @Data
     @Builder
@@ -31,11 +35,4 @@ public class VehicleResponseDTO {
         private String id;
         private String type;
     }
-
-    private Integer kmForMaintenance;
-    private VehicleStatus status;
-
-    private String mainImageUrl;
-    private List<String> imageUrls;
-
 }

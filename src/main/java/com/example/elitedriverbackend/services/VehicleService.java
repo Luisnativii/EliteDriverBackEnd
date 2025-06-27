@@ -1,22 +1,24 @@
 package com.example.elitedriverbackend.services;
 
 import com.example.elitedriverbackend.domain.dtos.CreateVehicleDTO;
+import com.example.elitedriverbackend.domain.dtos.MaintenanceRecordDTO;
 import com.example.elitedriverbackend.domain.dtos.UpdateVehicleDTO;
+import com.example.elitedriverbackend.domain.dtos.VehicleResponseDTO;
 import com.example.elitedriverbackend.domain.dtos.VehicleTypeDTO;
+import com.example.elitedriverbackend.domain.entity.MaintenanceRecord;
 import com.example.elitedriverbackend.domain.entity.Vehicle;
 import com.example.elitedriverbackend.domain.entity.VehicleStatus;
 import com.example.elitedriverbackend.domain.entity.VehicleType;
+import com.example.elitedriverbackend.repositories.MaintenanceRecordRepository;
 import com.example.elitedriverbackend.repositories.VehicleRepository;
 import com.example.elitedriverbackend.repositories.VehicleTypeRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.time.LocalDateTime;
+import java.util.*;
+import java.util.stream.Collectors;
 import java.util.UUID;
 
 @Service
@@ -29,169 +31,156 @@ public class VehicleService {
     @Autowired
     private VehicleTypeRepository vehicleTypeRepository;
 
-    public void addVehicle(CreateVehicleDTO createVehicleDTO) {
-        Vehicle newVehicle = new Vehicle();
-        newVehicle.setName(createVehicleDTO.getName());
-        newVehicle.setBrand(createVehicleDTO.getBrand());
-        newVehicle.setModel(createVehicleDTO.getModel());
-        newVehicle.setCapacity(createVehicleDTO.getCapacity());
-        newVehicle.setPricePerDay(createVehicleDTO.getPricePerDay());
-        newVehicle.setKilometers(createVehicleDTO.getKilometers());
-        newVehicle.setFeatures(createVehicleDTO.getFeatures());
+    @Autowired
+    private MaintenanceRecordRepository maintenanceRecordRepository;
 
-        // km para mantenimiento
-        newVehicle.setKmForMaintenance(createVehicleDTO.getKmForMaintenance());
-        // estado inicial
-        newVehicle.setStatus(VehicleStatus.maintenanceCompleted);
-
-        // imagen principal
-        newVehicle.setMainImageUrl(createVehicleDTO.getMainImageUrl());
-        // lista de imágenes secundarias (si viene)
-        if (createVehicleDTO.getImageUrls() != null) {
-            newVehicle.setImageUrls(new ArrayList<>(createVehicleDTO.getImageUrls()));
+    public void addVehicle(CreateVehicleDTO dto) {
+        Vehicle v = new Vehicle();
+        v.setName(dto.getName());
+        v.setBrand(dto.getBrand());
+        v.setModel(dto.getModel());
+        v.setCapacity(dto.getCapacity());
+        v.setPricePerDay(dto.getPricePerDay());
+        v.setKilometers(dto.getKilometers());
+        v.setFeatures(dto.getFeatures());
+        v.setInsurancePhone(dto.getInsurancePhone());
+        v.setKmForMaintenance(dto.getKmForMaintenance());
+        v.setStatus(VehicleStatus.maintenanceCompleted);
+        v.setMainImageUrl(dto.getMainImageUrl());
+        if (dto.getImageUrls() != null) {
+            v.setImageUrls(new ArrayList<>(dto.getImageUrls()));
         }
 
-        String typeName = createVehicleDTO.getVehicleType().getType();
-        VehicleType type = vehicleTypeRepository
-                .findByType(typeName)
+        String typeName = dto.getVehicleType().getType();
+        VehicleType type = vehicleTypeRepository.findByType(typeName)
                 .orElseThrow(() -> new RuntimeException("Vehicle type '" + typeName + "' no encontrado"));
-        newVehicle.setVehicleType(type);
+        v.setVehicleType(type);
 
-        vehicleRepository.save(newVehicle);
+        vehicleRepository.save(v);
     }
 
-    public void updateVehicle(UpdateVehicleDTO updateVehicleDTO, UUID id) {
-        Optional<Vehicle> opVehicle = vehicleRepository.findById(id);
-        if (opVehicle.isEmpty()) {
-            throw new RuntimeException("Vehicle con id " + id + " no encontrado");
-        }
-
-        Vehicle vehicleToUpdate = opVehicle.get();
-
-        // Almacenar el km anterior para calcular la diferencia
-        Integer previousKm = vehicleToUpdate.getKilometers();
-
-        if (updateVehicleDTO.getPricePerDay() != null) {
-            vehicleToUpdate.setPricePerDay(updateVehicleDTO.getPricePerDay());
-        }
-
-        if (updateVehicleDTO.getKilometers() != null) {
-            vehicleToUpdate.setKilometers(updateVehicleDTO.getKilometers());
-        }
-
-        if (updateVehicleDTO.getFeatures() != null) {
-            vehicleToUpdate.setFeatures(updateVehicleDTO.getFeatures());
-        }
-
-        if (updateVehicleDTO.getKmForMaintenance() != null) {
-            vehicleToUpdate.setKmForMaintenance(updateVehicleDTO.getKmForMaintenance());
-        }
-
-        // NUEVA LÓGICA: Verificar mantenimiento basado en intervalos
-        if (updateVehicleDTO.getKilometers() != null && vehicleToUpdate.getKmForMaintenance() != null) {
-            Integer currentKm = updateVehicleDTO.getKilometers();
-            Integer maintenanceInterval = vehicleToUpdate.getKmForMaintenance();
-
-            // Calcular cuántos intervalos de mantenimiento ha completado el vehículo
-            Integer currentMaintenanceCycles = currentKm / maintenanceInterval;
-            Integer previousMaintenanceCycles = previousKm / maintenanceInterval;
-
-            log.info("🔧 Verificando mantenimiento para vehículo {}: {} km -> {} km",
-                    vehicleToUpdate.getName(), previousKm, currentKm);
-            log.info("Intervalos completados: anterior={}, actual={}, intervalo={}km",
-                    previousMaintenanceCycles, currentMaintenanceCycles, maintenanceInterval);
-
-            // Si ha completado más ciclos de mantenimiento, requiere mantenimiento
-            if (currentMaintenanceCycles > previousMaintenanceCycles) {
-                vehicleToUpdate.setStatus(VehicleStatus.maintenanceRequired);
-                log.info("⚠️ Vehículo {} requiere mantenimiento - Completó {} intervalos de {}km",
-                        vehicleToUpdate.getName(), currentMaintenanceCycles, maintenanceInterval);
-            }
-            // Solo permitir cambio manual de status si no requiere mantenimiento automático
-            else if (updateVehicleDTO.getStatus() != null) {
-                vehicleToUpdate.setStatus(updateVehicleDTO.getStatus());
-            }
-        }
-        // Si no se actualizan los km, permitir cambio manual de status
-        else if (updateVehicleDTO.getStatus() != null) {
-            vehicleToUpdate.setStatus(updateVehicleDTO.getStatus());
-        }
-
-        if (updateVehicleDTO.getMainImageUrl() != null) {
-            vehicleToUpdate.setMainImageUrl(updateVehicleDTO.getMainImageUrl());
-        }
-
-        if (updateVehicleDTO.getImageUrls() != null) {
-            vehicleToUpdate.setImageUrls(new ArrayList<>(updateVehicleDTO.getImageUrls()));
-        }
-
-        vehicleRepository.save(vehicleToUpdate);
-    }
-
-    public void deleteVehicle(UUID vehicleId) {
-        Optional<Vehicle> opVehicle = vehicleRepository.findById(vehicleId);
-        if (opVehicle.isEmpty()) {
-            throw new RuntimeException("Vehicle con id " + vehicleId + " no encontrado");
-        }
-        vehicleRepository.delete(opVehicle.get());
-    }
-
-    public List<Vehicle> getAllVehicles() {
-        try {
-            log.info("Obteniendo todos los vehículos");
-            List<Vehicle> vehicles = vehicleRepository.findAll();
-
-            log.info("Total vehículos recuperados: {}", vehicles.size());
-            vehicles.forEach(v -> {
-                try {
-                    log.info("Vehículo ID: {}", v.getId());
-                    log.info("  Nombre: {}", v.getName());
-                    log.info("  Marca: {}", v.getBrand());
-                    log.info("  Modelo: {}", v.getModel());
-                    log.info("  Tipo: {}", v.getVehicleType() != null ? v.getVehicleType().getType() : "NULL");
-                    log.info("  Tipo ID: {}", v.getVehicleType() != null ? v.getVehicleType().getId() : "NULL");
-                } catch (Exception innerEx) {
-                    log.error("❌ Error procesando vehículo con ID: {}", v.getId(), innerEx);
-                }
-            });
-
-            return vehicles;
-        } catch (Exception e) {
-            log.error("❌ Error obteniendo vehículos: ", e);
-            throw new RuntimeException("Error al obtener vehículos: " + e.getMessage(), e);
-        }
-    }
-
-    public Vehicle getVehicleById(UUID id) {
-        return vehicleRepository.findById(id)
+    public void updateVehicle(UpdateVehicleDTO dto, UUID id) {
+        Vehicle v = vehicleRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Vehicle con id " + id + " no encontrado"));
+        Integer prevKm = v.getKilometers();
+
+        // Update simple fields
+        if (dto.getPricePerDay() != null)        v.setPricePerDay(dto.getPricePerDay());
+        if (dto.getKilometers() != null)         v.setKilometers(dto.getKilometers());
+        if (dto.getFeatures() != null)           v.setFeatures(dto.getFeatures());
+        if (dto.getInsurancePhone() != null)     v.setInsurancePhone(dto.getInsurancePhone());
+        if (dto.getKmForMaintenance() != null)   v.setKmForMaintenance(dto.getKmForMaintenance());
+        if (dto.getMainImageUrl() != null)       v.setMainImageUrl(dto.getMainImageUrl());
+        if (dto.getImageUrls() != null)          v.setImageUrls(new ArrayList<>(dto.getImageUrls()));
+
+        // Maintenance logic: record date+km when crossing a maintenance interval
+        if (dto.getKilometers() != null && v.getKmForMaintenance() != null) {
+            int currKm      = dto.getKilometers();
+            int interval    = v.getKmForMaintenance();
+            int prevCycles  = prevKm / interval;
+            int currCycles  = currKm / interval;
+
+            log.info("🔧 Checking maintenance for '{}' ({}→{} km), interval {}",
+                    v.getName(), prevKm, currKm, interval);
+
+            if (currCycles > prevCycles) {
+                // Persist maintenance record
+                MaintenanceRecord record = MaintenanceRecord.builder()
+                        .vehicle(v)
+                        .maintenanceDate(LocalDateTime.now())
+                        .kmAtMaintenance(currKm)
+                        .build();
+                maintenanceRecordRepository.save(record);
+
+                v.setStatus(VehicleStatus.maintenanceRequired);
+                log.info("⚠️ '{}' now requires maintenance", v.getName());
+            }
+            else if (dto.getStatus() != null) {
+                v.setStatus(dto.getStatus());
+            }
+        }
+        else if (dto.getStatus() != null) {
+            v.setStatus(dto.getStatus());
+        }
+
+        vehicleRepository.save(v);
     }
 
-    public List<Vehicle> getVehicleByType(VehicleTypeDTO vehicleTypeDTO) {
-        String typeName = vehicleTypeDTO.getType();
-        VehicleType type = vehicleTypeRepository
-                .findByType(typeName)
+    public void deleteVehicle(UUID id) {
+        Vehicle v = vehicleRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Vehicle con id " + id + " no encontrado"));
+        vehicleRepository.delete(v);
+    }
+
+    public List<VehicleResponseDTO> getAllVehicles() {
+        return vehicleRepository.findAll().stream()
+                .map(this::toResponseDTO)
+                .collect(Collectors.toList());
+    }
+
+    public VehicleResponseDTO getVehicleById(UUID id) {
+        Vehicle v = vehicleRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Vehicle con id " + id + " no encontrado"));
+        return toResponseDTO(v);
+    }
+
+    public List<VehicleResponseDTO> getVehicleByType(VehicleTypeDTO typeDto) {
+        String typeName = typeDto.getType();
+        VehicleType type = vehicleTypeRepository.findByType(typeName)
                 .orElseThrow(() -> new RuntimeException("Vehicle type '" + typeName + "' no encontrado"));
-        return vehicleRepository.findByVehicleType(type);
+        return vehicleRepository.findByVehicleType(type).stream()
+                .map(this::toResponseDTO)
+                .collect(Collectors.toList());
     }
 
-    public List<Vehicle> getVehicleByCapacity(String capacity) {
+    public List<VehicleResponseDTO> getVehicleByCapacity(String capacity) {
         int cap = Integer.parseInt(capacity);
-        return vehicleRepository.findByCapacity(cap);
+        return vehicleRepository.findByCapacity(cap).stream()
+                .map(this::toResponseDTO)
+                .collect(Collectors.toList());
     }
 
-
-    public List<Vehicle> getAvailableVehicles(LocalDate startDate, LocalDate endDate) {
-        log.info("Obteniendo vehículos disponibles entre {} y {}", startDate, endDate);
-
-
-        Date start = java.sql.Date.valueOf(startDate);
-        Date end   = java.sql.Date.valueOf(endDate);
-
+    public List<VehicleResponseDTO> getAvailableVehicles(Date startDate, Date endDate) {
         return vehicleRepository.findAvailableBetween(
-                VehicleStatus.maintenanceCompleted,
-                start,
-                end
-        );
+                        VehicleStatus.maintenanceCompleted,
+                        startDate,
+                        endDate
+                ).stream()
+                .map(this::toResponseDTO)
+                .collect(Collectors.toList());
+    }
+
+    // —————— Helper: map Vehicle + its MaintenanceRecords → DTO ——————
+    private VehicleResponseDTO toResponseDTO(Vehicle v) {
+        List<MaintenanceRecordDTO> hist = maintenanceRecordRepository
+                .findByVehicleIdOrderByMaintenanceDateDesc(v.getId())
+                .stream()
+                .map(r -> MaintenanceRecordDTO.builder()
+                        .id(r.getId())
+                        .maintenanceDate(r.getMaintenanceDate())
+                        .kmAtMaintenance(r.getKmAtMaintenance())
+                        .build())
+                .collect(Collectors.toList());
+
+        return VehicleResponseDTO.builder()
+                .id(v.getId().toString())
+                .name(v.getName())
+                .brand(v.getBrand())
+                .model(v.getModel())
+                .capacity(v.getCapacity())
+                .pricePerDay(v.getPricePerDay())
+                .kilometers(v.getKilometers())
+                .features(v.getFeatures())
+                .vehicleType(VehicleResponseDTO.VehicleTypeInfo.builder()
+                        .id(v.getVehicleType().getId().toString())
+                        .type(v.getVehicleType().getType())
+                        .build())
+                .kmForMaintenance(v.getKmForMaintenance())
+                .status(v.getStatus())
+                .mainImageUrl(v.getMainImageUrl())
+                .imageUrls(v.getImageUrls())
+                .insurancePhone(v.getInsurancePhone())
+                .maintenanceRecords(hist)
+                .build();
     }
 }

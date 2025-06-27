@@ -62,4 +62,6 @@ public class CreateVehicleDTO {
     private String mainImageUrl;
     private List<String> imageUrls;
 
+    private String insurancePhone;
+
 }
