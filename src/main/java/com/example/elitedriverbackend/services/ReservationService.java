@@ -45,7 +45,7 @@ public class ReservationService {
                 .orElseThrow(() -> new RuntimeException("Vehiculo no encontrado"));
         // Convertir LocalDate a java.sql.Date (sin hora ni desfase)
         LocalDate start = createReservationDTO.getStartDate();
-        LocalDate end = createReservationDTO.getEndDate().plusDays(1); // incluir el día completo
+        LocalDate end = createReservationDTO.getEndDate();
 
         Date startDate = java.sql.Date.valueOf(start);
         Date endDate = java.sql.Date.valueOf(end);
