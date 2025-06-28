@@ -159,6 +159,8 @@ public class VehicleService {
                         .id(r.getId())
                         .maintenanceDate(r.getMaintenanceDate())
                         .kmAtMaintenance(r.getKmAtMaintenance())
+                        .createdAt(r.getCreatedAt())
+                        .updatedAt(r.getUpdatedAt())
                         .build())
                 .collect(Collectors.toList());
 

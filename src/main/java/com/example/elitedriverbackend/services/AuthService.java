@@ -15,6 +15,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -83,7 +85,7 @@ public class AuthService {
                 .role(user.getRole())
                 .phoneNumber(user.getPhoneNumber())
                 .dui(user.getDui())
-                //.birthDate(user.getBirthDate())
+                .birthDate(LocalDate.parse(user.getBirthDate()))
                 .build();
 
         return AuthResponse.builder()

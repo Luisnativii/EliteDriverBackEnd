@@ -12,6 +12,8 @@ public class MaintenanceRecordDTO {
     private UUID id;
     private LocalDateTime maintenanceDate;
     private Integer kmAtMaintenance;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 }
 
 
