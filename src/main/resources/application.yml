@@ -1,6 +1,4 @@
 spring:
-  application:
-    name: elite-driver-auth
   datasource:
     url: jdbc:postgresql://localhost:5432/elitedriver
     username: postgres
@@ -8,16 +6,28 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update
+    show-sql: true
     properties:
       hibernate:
+        format_sql: true
         globally_quoted_identifiers: true
-    show-sql: true
-    defer-datasource-initialization: true
+        # Configuraciones específicas para UUID
+        id:
+          new_generator_mappings: false
+          uuid_gen_strategy_class: org.hibernate.id.uuid.StandardRandomStrategy
+        # Dialecto específico para PostgreSQL
+        dialect: org.hibernate.dialect.PostgreSQLDialect
   sql:
     init:
       mode: always
 
+# Configuración de logging para debugging UUID (opcional)
+logging:
+  level:
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+    com.example.elitedriverbackend.services.VehicleService: DEBUG
+
 jwt:
   secret: "2dc4d72e-b851-4844-aa5d-f944e452f0d4"
-  exptime: 1296000000 # 15 días en milisegundos
-
+  exptime: 1296000000
