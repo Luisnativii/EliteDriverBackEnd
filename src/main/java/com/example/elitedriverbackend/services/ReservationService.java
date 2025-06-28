@@ -15,6 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -42,12 +43,18 @@ public class ReservationService {
 
         Vehicle vehicle = vehicleRepository.findById(UUID.fromString(createReservationDTO.getVehicleId()))
                 .orElseThrow(() -> new RuntimeException("Vehiculo no encontrado"));
-        Date start = createReservationDTO.getStartDate();
-        Date end = createReservationDTO.getEndDate();
+        // Convertir LocalDate a java.sql.Date (sin hora ni desfase)
+        LocalDate start = createReservationDTO.getStartDate();
+        LocalDate end = createReservationDTO.getEndDate().plusDays(1); // incluir el día completo
+
+        Date startDate = java.sql.Date.valueOf(start);
+        Date endDate = java.sql.Date.valueOf(end);
+
+
 
         // Validar si ya está reservado en ese rango
         List<Reservation> overlappingReservations = reservationRepository
-                .findByVehicleIdAndDateOverlap(vehicle.getId(), start, end);
+                .findByVehicleIdAndDateOverlap(vehicle.getId(), startDate, endDate);
 
         if (!overlappingReservations.isEmpty()) {
             throw new ResponseStatusException(
@@ -56,9 +63,10 @@ public class ReservationService {
             );
               }
 
+
         Reservation newReservation = new Reservation();
-        newReservation.setStartDate(start);
-        newReservation.setEndDate(end);
+        newReservation.setStartDate(startDate);
+        newReservation.setEndDate(endDate);
         newReservation.setUser(user);
         newReservation.setVehicle(vehicle);
         return reservationRepository.save(newReservation);

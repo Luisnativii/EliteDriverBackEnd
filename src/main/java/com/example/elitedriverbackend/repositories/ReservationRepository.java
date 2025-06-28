@@ -15,11 +15,11 @@ import java.util.UUID;
 public interface ReservationRepository extends JpaRepository<Reservation, UUID> {
     List<Reservation> findByStartDateBetween(@Param("startDate") Date startDate, @Param("endDate") Date endDate);
     List<Reservation> findByVehicle_VehicleType(VehicleType vehicleType);
-
     @Query("SELECT r FROM Reservation r WHERE r.vehicle.id = :vehicleId AND " +
-            "(:startDate < r.endDate AND :endDate > r.startDate)")
+            "(:startDate <= r.endDate AND :endDate >= r.startDate)")
     List<Reservation> findByVehicleIdAndDateOverlap(
             @Param("vehicleId") UUID vehicleId,
             @Param("startDate") Date startDate,
             @Param("endDate") Date endDate);
+
 }

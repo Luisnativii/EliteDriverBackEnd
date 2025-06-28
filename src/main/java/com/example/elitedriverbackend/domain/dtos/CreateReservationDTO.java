@@ -9,6 +9,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 @Data
@@ -19,11 +20,11 @@ public class CreateReservationDTO {
 
     @NotNull(message = "La fecha de inicio es requerida")
     @DateTimeFormat(pattern = "dd-MM-yyyy")
-    private Date startDate;
+    private LocalDate startDate;
 
     @NotNull(message = "La fecha de fin es requerida")
     @DateTimeFormat(pattern = "dd-MM-yyyy")
-    private Date endDate;
+    private LocalDate endDate;
 
     @NotBlank(message = "El ID del usuario es requerido")
     private String userId;
