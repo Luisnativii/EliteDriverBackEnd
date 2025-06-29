@@ -1,5 +1,5 @@
 
-# 🚗 EliteDrive — Backend
+# EliteDrive — Backend
 
 ## Equipo: Asesuisa
 
