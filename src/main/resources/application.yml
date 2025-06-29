@@ -1,8 +1,9 @@
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/elitedriver
-    username: postgres
-    password: admin
+    url: jdbc:postgresql://dpg-d1g86kvfte5s738bos8g-a.oregon-postgres.render.com:5432/elitedriver
+    username: elitedriver_user
+    password: qGo5keN9lAjSfgm4cX6FT4hsfeoDoavX
+    driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
       ddl-auto: update
