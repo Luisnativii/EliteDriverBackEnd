@@ -1,5 +1,5 @@
 
-# EliteDrive — Backend
+# 🚗 EliteDrive — Backend
 
 ## Equipo: Asesuisa
 
@@ -9,7 +9,7 @@ Este backend está desarrollado con **Spring Boot** y expone una API REST consum
 
 ---
 
-## Tecnologías utilizadas
+## 🛠️ Tecnologías utilizadas
 
 | Capa             | Tecnología usada     |
 |------------------|----------------------|
@@ -27,14 +27,15 @@ Este backend está desarrollado con **Spring Boot** y expone una API REST consum
 pnc-proyecto-final-grupo-04-s01/
 ├── src/
 │   └── main/
-│       ├── java/com/asesuisa/elitedrive/
-│       │   ├── auth/            # Seguridad y autenticación
-│       │   ├── controller/      # Controladores REST
-│       │   ├── dto/             # Clases DTO
-│       │   ├── entity/          # Entidades del modelo
-│       │   ├── repository/      # Interfaces JPA
-│       │   ├── service/         # Lógica de negocio
-│       │   └── EliteDriveApp.java # Clase principal
+│       ├── java/com/example/elitedriverbackend/
+│       │   ├── config/         # Configuración general del proyecto
+│       │   ├── controller/     # Controladores REST
+│       │   ├── domain/         # Entidades y lógica de dominio
+│       │   ├── handlers/       # Manejadores de excepciones
+│       │   ├── repositories/   # Interfaces JPA
+│       │   ├── security/       # Seguridad y JWT
+│       │   ├── services/       # Lógica de negocio
+│       │   └── EliteDriverBackendApplication.java # Clase principal
 │       └── resources/
 │           └── application.properties
 ├── Dockerfile
@@ -73,7 +74,7 @@ El proyecto implementa autenticación y autorización con **JWT (JSON Web Tokens
 
 ---
 
-## Pruebas
+## 🧪 Pruebas
 
 Puedes probar la API con herramientas como **Insomnia** o **Postman**. Los tokens JWT deben enviarse en el header `Authorization`:
 
@@ -83,7 +84,7 @@ Authorization: Bearer <tu-token-jwt>
 
 ---
 
-## Despliegue
+## 🚀 Despliegue
 
 ### Render (recomendado)
 El backend puede desplegarse fácilmente en Render.com utilizando el archivo `Dockerfile` incluido.
@@ -100,7 +101,7 @@ docker run -p 8080:8080 elitedrive-backend
 
 ---
 
-## Variables de entorno (ejemplo)
+## 🧾 Variables de entorno (ejemplo)
 
 Para producción o desarrollo, debes configurar:
 
@@ -115,7 +116,7 @@ jwt.expiration=86400000
 
 ---
 
-## Usuarios de prueba
+## 🧑‍💼 Usuarios de prueba
 
 ### Administrador
 
@@ -128,7 +129,7 @@ jwt.expiration=86400000
 
 ---
 
-## Funcionalidades clave
+## 🔍 Funcionalidades clave
 
 - Autenticación con JWT
 - Registro/Login
@@ -140,7 +141,7 @@ jwt.expiration=86400000
 
 ---
 
-## Licencia
+## 📝 Licencia
 
 Este proyecto fue desarrollado como entrega final del curso **Programación N Capas - Ciclo 01-25**. Uso estrictamente académico.
 
