@@ -1,3 +1,28 @@
+## 📂 Estructura General de la Colección
+
+| Carpeta / Endpoint      | Método | Descripción                               |
+|-------------------------|--------|-------------------------------------------|
+| **Reservation**         | —      | Endpoints para gestionar reservas         |
+| — Create Reservation    | POST   | Crear una reserva                         |
+| — Get All Reservations  | GET    | Obtener todas las reservas                |
+| — Get By Vehicle Type   | GET    | Reservas por tipo de vehículo             |
+| — Get By Vehicle        | GET    | Reservas por vehículo                     |
+| — Get By Vehicle Id     | GET    | Reservas por ID de vehículo               |
+| — Get By User Id        | GET    | Reservas de un usuario                    |
+| — Delete Reservation    | DELETE | Eliminar reserva                          |
+| — Get By Range          | GET    | Reservas dentro de un rango de fechas     |
+| **Auth**                | —      | Autenticación de usuarios                 |
+| — Register              | POST   | Registrar nuevo usuario                   |
+| — Login                 | POST   | Inicio de sesión                          |
+| **Vehicles**            | —      | Gestión de vehículos                      |
+| — Get All               | GET    | Obtener todos los vehículos               |
+| — Create Vehicle        | POST   | Crear un vehículo nuevo (Admin)           |
+| — Get Vehicle by ID     | GET    | Obtener un vehículo por ID                |
+| — Update Vehicle        | PUT    | Modificar datos del vehículo              |
+| — Add Images            | POST   | Subir imágenes al vehículo                |
+
+-- Copiar desde a qui
+
 type: collection.insomnia.rest/5.0
 name: EliteDriver
 meta:
