@@ -21,7 +21,7 @@
 | — Update Vehicle        | PUT    | Modificar datos del vehículo              |
 | — Add Images            | POST   | Subir imágenes al vehículo                |
 
--- Copiar desde a qui
+--------------------------------------------------------------------------------------------------
 
 type: collection.insomnia.rest/5.0
 name: EliteDriver
